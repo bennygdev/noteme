@@ -1,4 +1,4 @@
-# bennygoh_notion
+# NoteMe
 
 Notion replication as part of worldskills training. Note taking, habit tracker and a to-do-list, all in one.
 
