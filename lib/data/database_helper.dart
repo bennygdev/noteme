@@ -58,10 +58,10 @@ class DatabaseHelper {
   }
 
   // retrieve all comment
-  Future<List<Comment>> retrieveComments(int mealId) async{
+  Future<List<Comment>> retrieveComments(int noteId) async{
     final Database db = await initializeDb();
     final List<Map<String, dynamic>> queryResult =
-    await db.query("Comment", where: "mealId = ?", whereArgs: [mealId]);
+    await db.query("Comment", where: "noteId = ?", whereArgs: [noteId]);
     return queryResult.map((e) => Comment.fromMap(e)).toList();
   }
 
@@ -78,8 +78,8 @@ class DatabaseHelper {
   // ...
 
   // delete comment
-  Future<void> deleteComments(int mealId) async{
+  Future<void> deleteComments(int noteId) async{
     final Database db = await initializeDb();
-    await db.delete("Comment", where: "mealId = ?", whereArgs: [mealId]);
+    await db.delete("Comment", where: "noteId = ?", whereArgs: [noteId]);
   }
 }

@@ -1,7 +1,10 @@
 import 'package:bennygoh_notion/habit/habit_tracker.dart';
+import 'package:bennygoh_notion/note/add_note.dart';
 import 'package:bennygoh_notion/note/search_note.dart';
 import 'package:bennygoh_notion/todo/todolist.dart';
 import 'package:flutter/material.dart';
+import 'data/database_helper.dart';
+import 'data/data_classes.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -11,6 +14,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late DatabaseHelper handler;
+  List<Note> _notes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    handler = DatabaseHelper();
+    handler.initializeDb();
+    loadNotes();
+  }
+
+  void loadNotes() async {
+    List<Note> notes = await handler.retrieveNotes();
+    setState(() {
+      _notes = notes;
+    });
+  }
 
   Widget userSection = Column(
     children: [
@@ -47,34 +67,42 @@ class _HomePageState extends State<HomePage> {
     ],
   );
 
-  Widget notes = Column(
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            "Your Notes",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF787773)
-            )
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.add,
-              color: Color(0xFF787773),
-              size: 28,
-            ),
-          )
-        ],
-      ),
-    ]
-  );
-
   @override
   Widget build(BuildContext context) {
+
+    // moved widget component here so context is intialized by build constructor
+    Widget notes = Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                  "Your Notes",
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF787773)
+                  )
+              ),
+              IconButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => AddNote(),
+                      )
+                  ).then((ctx) => loadNotes());
+                },
+                icon: Icon(
+                  Icons.add,
+                  color: Color(0xFF787773),
+                  size: 28,
+                ),
+              )
+            ],
+          ),
+        ]
+    );
+
     return Scaffold(
       backgroundColor: Color(0xFFf7f7f5),
       // appBar: AppBar(
@@ -92,6 +120,19 @@ class _HomePageState extends State<HomePage> {
             recentNotes,
             SizedBox(height: 30),
             notes,
+            _notes.isEmpty ?
+                Text("None") :
+            Flexible(child: ListView.builder(
+              itemCount: _notes.length,
+              itemBuilder: (context, index) {
+                final note = _notes[index];
+                return ListTile(
+                    tileColor: Colors.red,
+                    title: Text(note.title)
+                );
+              },
+            ),
+            ),
           ],
         ),
       ),
