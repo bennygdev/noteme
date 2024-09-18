@@ -1,4 +1,7 @@
+import 'package:bennygoh_notion/habit/habit_tracker.dart';
 import 'package:bennygoh_notion/home.dart';
+import 'package:bennygoh_notion/note/search_note.dart';
+import 'package:bennygoh_notion/todo/todolist.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -17,6 +20,9 @@ class MyApp extends StatelessWidget {
       initialRoute: "/",
       routes: {
         "/": (ctx) => HomePage(),
+        "/search": (ctx) => SearchNote(),
+        "/habitTracker": (ctx) => HabitTracker(),
+        "/toDoList": (ctx) => ToDoList(),
       }
     );
   }
