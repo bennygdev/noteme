@@ -16,6 +16,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late DatabaseHelper handler;
   List<Note> _notes = [];
+  List<Note> _recentNotes = [];
 
   @override
   void initState() {
@@ -29,6 +30,9 @@ class _HomePageState extends State<HomePage> {
     List<Note> notes = await handler.retrieveNotes();
     setState(() {
       _notes = notes;
+
+      _recentNotes = notes..sort((a, b) => b.dateEpochMS.compareTo(a.dateEpochMS));
+      _recentNotes = _recentNotes.take(5).toList(); // limit to 5 most recent
     });
   }
 
@@ -135,9 +139,9 @@ class _HomePageState extends State<HomePage> {
       height: 120,
       child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: _notes.length,
+          itemCount: _recentNotes.length,
           itemBuilder: (context, index) {
-            final note = _notes[index];
+            final note = _recentNotes[index];
             return GestureDetector(
                 onTap: () {}, // edit func
                 child: Container(
@@ -194,9 +198,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    Widget noteList = _notes.isEmpty ?
-    Text("None") :
-    _notes.isEmpty
+    Widget noteList = _notes.isEmpty
         ? Center(child: Text("None"))
         : MediaQuery.removePadding( // remove top padidng
       context: context,
@@ -227,11 +229,6 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: Color(0xFFf7f7f5),
-      // appBar: AppBar(
-      //   title: Text("Hello"),
-      //   backgroundColor: Colors.blue, // roy did not add appbar, custom
-      // ),
-
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.fromLTRB(20, 40, 20, 40),
@@ -239,13 +236,19 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               userSection,
-              SizedBox(height: 30),
-              recentNoteHeading,
-              SizedBox(height: 16),
-              recentNotes,
+
+              _notes.isEmpty ? Column() : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 30),
+                  recentNoteHeading,
+                  SizedBox(height: 16),
+                  recentNotes,
+                ],
+              ),
               SizedBox(height: 30),
               noteHeading,
-              noteList
+              noteList,
             ],
           ),
         ),
