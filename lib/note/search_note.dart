@@ -24,7 +24,7 @@ class _SearchNoteState extends State<SearchNote> {
         currentIndex: 1,
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Color(0xFFf7f7f5),
         type: BottomNavigationBarType.fixed,
         elevation: 0.0,
         items: [

@@ -24,7 +24,7 @@ class _HabitTrackerState extends State<HabitTracker> {
         currentIndex: 2,
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Color(0xFFf7f7f5),
         type: BottomNavigationBarType.fixed,
         elevation: 0.0,
         items: [

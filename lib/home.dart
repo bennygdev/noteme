@@ -32,6 +32,31 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void deleteNote(int id) async {
+    final confirmed = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Confirm Delete"),
+        content: Text("Are you sure you want to delete this note?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text("Cancel")
+          ),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text("Delete")
+          )
+        ],
+      )
+    );
+
+    if (confirmed == true) {
+      await handler.deleteNote(id);
+      loadNotes(); // reload
+    }
+  }
+
   Widget userSection = Column(
     children: [
       Row(
@@ -54,7 +79,7 @@ class _HomePageState extends State<HomePage> {
     ],
   );
 
-  Widget recentNotes = Column(
+  Widget recentNoteHeading = Column(
     children: [
       Text(
         "Jump back in",
@@ -67,11 +92,13 @@ class _HomePageState extends State<HomePage> {
     ],
   );
 
+
+
   @override
   Widget build(BuildContext context) {
 
     // moved widget component here so context is intialized by build constructor
-    Widget notes = Column(
+    Widget noteHeading = Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -103,6 +130,101 @@ class _HomePageState extends State<HomePage> {
         ]
     );
 
+    // not recent notes, just a placeholder (not yet coded the recent note logic)
+    Widget recentNotes = SizedBox(
+      height: 120,
+      child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: _notes.length,
+          itemBuilder: (context, index) {
+            final note = _notes[index];
+            return GestureDetector(
+                onTap: () {}, // edit func
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15.0),
+                    color: Colors.blueGrey,
+                  ),
+                  width: 150,
+                  margin: EdgeInsets.only(right: 10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(15.0),
+                        child: Container(
+                          height: 2 / 3 * 120, // 2/3 of the parent container's height
+                          width: 150,
+                          color: Colors.transparent,
+                          child: Image.asset(
+                            'assets/images/profile_picture.png', // pls replace image soon
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        height: 1 / 3 * 120, // 1/3 of the parent container's height
+                        width: 150,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(15.0),
+                            bottomRight: Radius.circular(15.0),
+                          ), // Border radius for the 2/3 container
+                          color: Colors.white,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              note.title,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black, // Text color within the white container
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+            );
+          }
+      ),
+    );
+
+    Widget noteList = _notes.isEmpty ?
+    Text("None") :
+    _notes.isEmpty
+        ? Center(child: Text("None"))
+        : MediaQuery.removePadding( // remove top padidng
+      context: context,
+      removeTop: true,
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        itemCount: _notes.length,
+        itemBuilder: (context, index) {
+          final note = _notes[index];
+          return ListTile(
+            leading: Icon(
+                Icons.description
+            ),
+            tileColor: Colors.white,
+            title: Text(note.title),
+            shape: index != _notes.length - 1 ? Border(
+              bottom: BorderSide(
+                  width: 1,
+                  color: Color(0xFFe2e2e2)
+              ),
+            ) : null,
+            onLongPress: () => deleteNote(note.id!),
+          );
+        },
+      ),
+    );
+
     return Scaffold(
       backgroundColor: Color(0xFFf7f7f5),
       // appBar: AppBar(
@@ -110,37 +232,29 @@ class _HomePageState extends State<HomePage> {
       //   backgroundColor: Colors.blue, // roy did not add appbar, custom
       // ),
 
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(20, 40, 20, 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            userSection,
-            SizedBox(height: 30),
-            recentNotes,
-            SizedBox(height: 30),
-            notes,
-            _notes.isEmpty ?
-                Text("None") :
-            Flexible(child: ListView.builder(
-              itemCount: _notes.length,
-              itemBuilder: (context, index) {
-                final note = _notes[index];
-                return ListTile(
-                    tileColor: Colors.red,
-                    title: Text(note.title)
-                );
-              },
-            ),
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(20, 40, 20, 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              userSection,
+              SizedBox(height: 30),
+              recentNoteHeading,
+              SizedBox(height: 16),
+              recentNotes,
+              SizedBox(height: 30),
+              noteHeading,
+              noteList
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Color(0xFFf7f7f5),
         type: BottomNavigationBarType.fixed,
         elevation: 0.0,
         items: [
