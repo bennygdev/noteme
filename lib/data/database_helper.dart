@@ -50,6 +50,17 @@ class DatabaseHelper {
 
   // modify note
   // ...
+  Future<void> updateNote(Note note) async {
+    final Database db = await initializeDb();
+
+    Map<String, dynamic> updatedValues = note.toMap();
+    await db.update(
+      'Note',
+      updatedValues,
+      where: "id = ?",
+      whereArgs: [note.id]
+    );
+  }
 
   // delete note
   Future<void> deleteNote(int id) async {

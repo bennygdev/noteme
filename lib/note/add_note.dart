@@ -3,6 +3,7 @@ import 'dart:io';
 // import 'package:intl/intl.dart';
 import '../data/database_helper.dart';
 import '../data/data_classes.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AddNote extends StatefulWidget {
   const AddNote({Key? key}) : super(key: key);
@@ -16,7 +17,8 @@ class _AddNoteState extends State<AddNote> {
   final formKey = GlobalKey<FormState>();
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
-  File? imageFile; // xfile or file?
+  // File? imageFile; // xfile or file? (Note that i want to try XFile, so swap it out please)
+  XFile? imageFile;
 
   @override
   void initState() {
@@ -28,16 +30,25 @@ class _AddNoteState extends State<AddNote> {
     });
   }
 
+  pickImage(ImageSource source) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedImage = await picker.pickImage(source: source);
+
+    setState(() {
+      imageFile = pickedImage;
+    });
+  }
+
   void addNote() async {
     if (formKey.currentState!.validate()) {
       final title = titleController.text;
       final description = descriptionController.text;
       final createdDate = DateTime.now().millisecondsSinceEpoch;
-      // add image path here
+      // add image path here ?? use Xfile instead of file
 
       final note = Note(
         title: title,
-        img: null,
+        img: imageFile?.path,
         description: description,
         dateEpochMS: createdDate,
       );
@@ -89,7 +100,15 @@ class _AddNoteState extends State<AddNote> {
                 children: [
                   Container(
                     height: 200,
-                    color: Colors.grey,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      image: imageFile != null
+                          ? DecorationImage(
+                        image: FileImage(File(imageFile!.path)),
+                        fit: BoxFit.cover,
+                      )
+                          : null,
+                    ),
                   ),
                   Padding(
                     padding: EdgeInsets.fromLTRB(0, 0, 10, 10),
@@ -112,23 +131,49 @@ class _AddNoteState extends State<AddNote> {
                               style: TextStyle(
                                 color: Colors.grey[900],
                                 fontSize: 12,
-                              )
-                            )
+                              ),
+                            ),
                           ],
                         ),
-                        onPressed: () {},
+                        onPressed: () async {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Wrap(
+                                children: [
+                                  ListTile(
+                                    leading: Icon(Icons.camera),
+                                    title: Text('Take Photo'),
+                                    onTap: () async {
+                                      Navigator.pop(context);
+                                      await pickImage(ImageSource.camera);
+                                    },
+                                  ),
+                                  ListTile(
+                                    leading: Icon(Icons.photo_library),
+                                    title: Text('Choose from Gallery'),
+                                    onTap: () async {
+                                      Navigator.pop(context);
+                                      await pickImage(ImageSource.gallery);
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.white.withOpacity(0.9),
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(7),
-                          )
-                        )
-                      )
-                    )
-                  )
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
-              ), // add ternary operator before the comma to show the add image button
+              ),
               Padding(
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: Column(

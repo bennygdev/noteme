@@ -1,10 +1,12 @@
 import 'package:bennygoh_notion/habit/habit_tracker.dart';
 import 'package:bennygoh_notion/note/add_note.dart';
+import 'package:bennygoh_notion/note/edit_note.dart';
 import 'package:bennygoh_notion/note/search_note.dart';
 import 'package:bennygoh_notion/todo/todolist.dart';
 import 'package:flutter/material.dart';
 import 'data/database_helper.dart';
 import 'data/data_classes.dart';
+import 'dart:io';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -143,7 +145,12 @@ class _HomePageState extends State<HomePage> {
           itemBuilder: (context, index) {
             final note = _recentNotes[index];
             return GestureDetector(
-                onTap: () {}, // edit func
+                onTap: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) => EditNote(note: note)))
+                      .then((ctx) => loadNotes());
+                }, // edit func
+                onLongPress: () => deleteNote(note.id!),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15.0),
@@ -160,10 +167,17 @@ class _HomePageState extends State<HomePage> {
                           height: 2 / 3 * 120, // 2/3 of the parent container's height
                           width: 150,
                           color: Colors.transparent,
-                          child: Image.asset(
-                            'assets/images/profile_picture.png', // pls replace image soon
+                          // child: Image.asset(
+                          //   'assets/images/profile_picture.png', // pls replace image soon
+                          //   fit: BoxFit.cover,
+                          // ),
+                          child: note.img != null ? Image.file(
+                            File(note.img!),
                             fit: BoxFit.cover,
-                          ),
+                          ) : Image.asset(
+                            'assets/images/profile_picture.png',
+                            fit: BoxFit.cover,
+                          )
                         ),
                       ),
                       Container(
@@ -221,6 +235,11 @@ class _HomePageState extends State<HomePage> {
                   color: Color(0xFFe2e2e2)
               ),
             ) : null,
+            onTap: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => EditNote(note: note)))
+                  .then((ctx) => loadNotes());
+            },
             onLongPress: () => deleteNote(note.id!),
           );
         },
@@ -246,7 +265,7 @@ class _HomePageState extends State<HomePage> {
                   recentNotes,
                 ],
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 20),
               noteHeading,
               noteList,
             ],
