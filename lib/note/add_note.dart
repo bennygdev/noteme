@@ -224,36 +224,6 @@ class _AddNoteState extends State<AddNote> {
                         return null;
                       }
                     ),
-                    Row(
-                      children: [
-                        TextButton(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.comment, size: 20, color: Color(0xFFB9B8B6)),
-                              SizedBox(width: 5),
-                              Text(
-                                'Add comment',
-                                style: TextStyle(
-                                  color: Color(0xFFB9B8B6),
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                          onPressed: () {
-                            // show that modal here!
-                          },
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(7),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                     TextFormField(
                       controller: descriptionController,
                       decoration: InputDecoration(
