@@ -106,6 +106,7 @@ class _EditNoteState extends State<EditNote> {
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
+                  if (imageFile != null)
                   Container(
                     height: 200,
                     decoration: BoxDecoration(
@@ -118,69 +119,102 @@ class _EditNoteState extends State<EditNote> {
                           : null,
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(0, 0, 10, 10),
-                    child: SizedBox(
-                      height: 29,
-                      width: 125,
-                      child: TextButton(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.image, size: 20, color: Colors.black),
-                            SizedBox(width: 5),
-                            Text(
-                              'Change Cover',
-                              style: TextStyle(
-                                color: Colors.grey[900],
-                                fontSize: 12,
+                  if (imageFile != null)
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(0, 0, 10, 10),
+                      child: SizedBox(
+                        height: 29,
+                        width: 100,
+                        child: TextButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Change Cover',
+                                style: TextStyle(
+                                  color: Color(0xFF81807C),
+                                  fontSize: 12,
+                                ),
                               ),
+                            ],
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              imageFile = null; // Remove the image
+                            });
+                          },
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.white.withOpacity(0.9),
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7),
                             ),
-                          ],
-                        ),
-                        onPressed: () async {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return Wrap(
-                                children: [
-                                  ListTile(
-                                    leading: Icon(Icons.camera),
-                                    title: Text('Take Photo'),
-                                    onTap: () async {
-                                      Navigator.pop(context);
-                                      await pickImage(ImageSource.camera);
-                                    },
-                                  ),
-                                  ListTile(
-                                    leading: Icon(Icons.photo_library),
-                                    title: Text('Choose from Gallery'),
-                                    onTap: () async {
-                                      Navigator.pop(context);
-                                      await pickImage(ImageSource.gallery);
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.9),
-                          padding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(7),
                           ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: Column(
                   children: [
+                    if (imageFile == null) // show add btn when no img
+                      Row(
+                        children: [
+                          TextButton(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.image, size: 20, color: Color(0xFFB9B8B6)),
+                                SizedBox(width: 5),
+                                Text(
+                                  'Add cover',
+                                  style: TextStyle(
+                                    color: Color(0xFFB9B8B6),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ListTile(
+                                        leading: Icon(Icons.camera),
+                                        title: Text('Take Photo'),
+                                        onTap: () async {
+                                          Navigator.pop(context);
+                                          await pickImage(ImageSource.camera);
+                                        },
+                                      ),
+                                      ListTile(
+                                        leading: Icon(Icons.photo_library),
+                                        title: Text('Choose from Gallery'),
+                                        onTap: () async {
+                                          Navigator.pop(context);
+                                          await pickImage(ImageSource.gallery);
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     TextFormField(
                       controller: titleController,
                       decoration: InputDecoration(
@@ -197,6 +231,36 @@ class _EditNoteState extends State<EditNote> {
                         }
                         return null;
                       },
+                    ),
+                    Row(
+                      children: [
+                        TextButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.comment, size: 20, color: Color(0xFFB9B8B6)),
+                              SizedBox(width: 5),
+                              Text(
+                                'Add comment',
+                                style: TextStyle(
+                                  color: Color(0xFFB9B8B6),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            // show that modal here!
+                          },
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     TextFormField(
                       controller: descriptionController,

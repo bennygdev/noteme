@@ -44,7 +44,6 @@ class _AddNoteState extends State<AddNote> {
       final title = titleController.text;
       final description = descriptionController.text;
       final createdDate = DateTime.now().millisecondsSinceEpoch;
-      // add image path here ?? use Xfile instead of file
 
       final note = Note(
         title: title,
@@ -98,6 +97,7 @@ class _AddNoteState extends State<AddNote> {
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
+                  if (imageFile != null)
                   Container(
                     height: 200,
                     decoration: BoxDecoration(
@@ -110,57 +110,30 @@ class _AddNoteState extends State<AddNote> {
                           : null,
                     ),
                   ),
+                  if (imageFile != null)
                   Padding(
                     padding: EdgeInsets.fromLTRB(0, 0, 10, 10),
                     child: SizedBox(
                       height: 29,
-                      width: 125,
+                      width: 105,
                       child: TextButton(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.image,
-                              size: 20,
-                              color: Colors.black,
-                            ),
-                            SizedBox(width: 5),
                             Text(
                               'Change Cover',
                               style: TextStyle(
-                                color: Colors.grey[900],
+                                color: Color(0xFF81807C),
                                 fontSize: 12,
                               ),
                             ),
                           ],
                         ),
-                        onPressed: () async {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return Wrap(
-                                children: [
-                                  ListTile(
-                                    leading: Icon(Icons.camera),
-                                    title: Text('Take Photo'),
-                                    onTap: () async {
-                                      Navigator.pop(context);
-                                      await pickImage(ImageSource.camera);
-                                    },
-                                  ),
-                                  ListTile(
-                                    leading: Icon(Icons.photo_library),
-                                    title: Text('Choose from Gallery'),
-                                    onTap: () async {
-                                      Navigator.pop(context);
-                                      await pickImage(ImageSource.gallery);
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
+                        onPressed: () {
+                          setState(() {
+                            imageFile = null;
+                          });
                         },
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.white.withOpacity(0.9),
@@ -178,6 +151,62 @@ class _AddNoteState extends State<AddNote> {
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: Column(
                   children: [
+                    if (imageFile == null) // show add btn when no img
+                      Row(
+                        children: [
+                          TextButton(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.image, size: 20, color: Color(0xFFB9B8B6)),
+                                SizedBox(width: 5),
+                                Text(
+                                  'Add cover',
+                                  style: TextStyle(
+                                    color: Color(0xFFB9B8B6),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ListTile(
+                                        leading: Icon(Icons.camera),
+                                        title: Text('Take Photo'),
+                                        onTap: () async {
+                                          Navigator.pop(context);
+                                          await pickImage(ImageSource.camera);
+                                        },
+                                      ),
+                                      ListTile(
+                                        leading: Icon(Icons.photo_library),
+                                        title: Text('Choose from Gallery'),
+                                        onTap: () async {
+                                          Navigator.pop(context);
+                                          await pickImage(ImageSource.gallery);
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     TextFormField(
                       controller: titleController,
                       decoration: InputDecoration(
@@ -194,6 +223,36 @@ class _AddNoteState extends State<AddNote> {
                         }
                         return null;
                       }
+                    ),
+                    Row(
+                      children: [
+                        TextButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.comment, size: 20, color: Color(0xFFB9B8B6)),
+                              SizedBox(width: 5),
+                              Text(
+                                'Add comment',
+                                style: TextStyle(
+                                  color: Color(0xFFB9B8B6),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            // show that modal here!
+                          },
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     TextFormField(
                       controller: descriptionController,

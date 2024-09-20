@@ -46,10 +46,7 @@ class DatabaseHelper {
     return queryResult.map((e) => Note.fromMap(e)).toList();
   }
 
-  // confirm later
-
   // modify note
-  // ...
   Future<void> updateNote(Note note) async {
     final Database db = await initializeDb();
 
