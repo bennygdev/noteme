@@ -174,10 +174,7 @@ class _HomePageState extends State<HomePage> {
                           child: note.img != null ? Image.file(
                             File(note.img!),
                             fit: BoxFit.cover,
-                          ) : Image.asset(
-                            'assets/images/profile_picture.png',
-                            fit: BoxFit.cover,
-                          )
+                          ) : Column()
                         ),
                       ),
                       Container(
@@ -250,7 +247,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Color(0xFFf7f7f5),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(20, 40, 20, 40),
+          padding: EdgeInsets.fromLTRB(20, 50, 20, 40),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
