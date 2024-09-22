@@ -58,6 +58,7 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (confirmed == true) {
+      await handler.deleteComments(id);
       await handler.deleteNote(id);
       loadNotes(); // reload
     }
@@ -136,7 +137,6 @@ class _HomePageState extends State<HomePage> {
         ]
     );
 
-    // not recent notes, just a placeholder (not yet coded the recent note logic)
     Widget recentNotes = SizedBox(
       height: 120,
       child: ListView.builder(

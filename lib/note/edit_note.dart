@@ -3,9 +3,10 @@ import 'dart:io';
 import '../data/database_helper.dart';
 import '../data/data_classes.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 class EditNote extends StatefulWidget {
-  final Note note; // Accept the note to be edited
+  final Note note;
 
   const EditNote({Key? key, required this.note}) : super(key: key);
 
@@ -18,7 +19,13 @@ class _EditNoteState extends State<EditNote> {
   final formKey = GlobalKey<FormState>();
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
+  final commentController = TextEditingController();
   XFile? imageFile;
+
+  List<Comment> comments = [];
+  Map<int, bool> isEditing = {}; // track edits for each comment
+  Map<int, TextEditingController> commentControllers = {};
+  bool showCommentForm = false;
 
   @override
   void initState() {
@@ -31,9 +38,58 @@ class _EditNoteState extends State<EditNote> {
     if (widget.note.img != null) {
       imageFile = XFile(widget.note.img!);
     }
+    loadComments();
 
     titleController.addListener(() {
       setState(() {});
+    });
+  }
+
+  loadComments() async {
+    comments = await handler.retrieveComments(widget.note.id);
+    setState(() {
+
+      // init comment controller
+      for (var comment in comments) {
+        isEditing[comment.id] = false;
+        commentControllers[comment.id] = TextEditingController(text: comment.comment);
+      }
+    });
+  }
+
+  void addComment() async {
+    if (commentController.text.isNotEmpty) {
+      final comment = Comment(
+        noteId: widget.note.id,
+        dateEpochMS: DateTime.now().millisecondsSinceEpoch,
+        comment: commentController.text,
+      );
+      await handler.insertComment(comment);
+      commentController.clear();
+      loadComments();
+    }
+  }
+
+  void deleteComment(int id) async {
+    await handler.deleteSingleComment(id);
+    loadComments();
+  }
+
+  void updateComment(Comment comment) async {
+    if (isEditing[comment.id]!) {
+      comment.comment = commentControllers[comment.id]!.text;
+      await handler.updateComment(comment);
+      setState(() {
+        isEditing[comment.id] = false; // exit edit mode after update
+      });
+    }
+  }
+
+  void cancelEdit(int id) {
+    setState(() {
+      isEditing[id] = false;
+      commentControllers[id]!.text =
+          comments.firstWhere((c) => c.id == id).comment;
     });
   }
 
@@ -232,36 +288,108 @@ class _EditNoteState extends State<EditNote> {
                         return null;
                       },
                     ),
-                    Row(
-                      children: [
-                        TextButton(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.comment, size: 20, color: Color(0xFFB9B8B6)),
-                              SizedBox(width: 5),
-                              Text(
-                                'Add comment',
-                                style: TextStyle(
-                                  color: Color(0xFFB9B8B6),
-                                  fontSize: 12,
+                    if (comments.isEmpty && !showCommentForm)
+                      Row(
+                        children: [
+                          TextButton(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.comment,
+                                    size: 20, color: Color(0xFFB9B8B6)),
+                                SizedBox(width: 5),
+                                Text(
+                                  'Add comment',
+                                  style: TextStyle(
+                                    color: Color(0xFFB9B8B6),
+                                    fontSize: 12,
+                                  ),
                                 ),
+                              ],
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                showCommentForm = true; // show comment form
+                              });
+                            },
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(7),
                               ),
-                            ],
-                          ),
-                          onPressed: () {
-                            // show that modal here!
-                          },
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(7),
                             ),
                           ),
+                        ],
+                      ),
+                    if (showCommentForm || comments.isNotEmpty)
+                      TextFormField(
+                        controller: commentController,
+                        decoration: InputDecoration(
+                          hintText: 'Add a comment',
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.send),
+                            onPressed: () {
+                              addComment();
+                            }, // Add comment when tapped
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    SizedBox(height: 10),
+                    if (comments.isNotEmpty)
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: comments.length,
+                        itemBuilder: (context, index) {
+                          final comment = comments[index];
+                          return ListTile(
+                            title: isEditing[comment.id]!
+                                ? TextFormField(
+                              controller: commentControllers[comment.id],
+                            )
+                                : Text(comment.comment),
+                            subtitle: Text(
+                              DateFormat.yMd()
+                                  .add_jm()
+                                  .format(DateTime.fromMillisecondsSinceEpoch(
+                                  comment.dateEpochMS)),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (!isEditing[comment.id]!)
+                                  IconButton(
+                                    icon: Icon(Icons.edit),
+                                    onPressed: () {
+                                      setState(() {
+                                        isEditing[comment.id] = true;
+                                      });
+                                    },
+                                  ),
+                                if (!isEditing[comment.id]!)
+                                  IconButton(
+                                    icon: Icon(Icons.delete),
+                                    onPressed: () =>
+                                        deleteComment(comment.id),
+                                  ),
+                                if (isEditing[comment.id]!)
+                                  IconButton(
+                                    icon: Icon(Icons.check),
+                                    onPressed: () =>
+                                        updateComment(comment),
+                                  ),
+                                if (isEditing[comment.id]!)
+                                  IconButton(
+                                    icon: Icon(Icons.close),
+                                    onPressed: () =>
+                                        cancelEdit(comment.id),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     TextFormField(
                       controller: descriptionController,
                       decoration: InputDecoration(

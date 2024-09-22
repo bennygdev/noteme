@@ -83,9 +83,25 @@ class DatabaseHelper {
   }
 
   // modify comment
-  // ...
+  Future<void> updateComment(Comment comment) async {
+    final Database db = await initializeDb();
 
-  // delete comment
+    Map<String, dynamic> updatedValues = comment.toMap();
+    await db.update(
+        'Comment',
+        updatedValues,
+        where: "id = ?",
+        whereArgs: [comment.id]
+    );
+  }
+
+  // delete a comment
+  Future<void> deleteSingleComment(int id) async {
+    final Database db = await initializeDb();
+    await db.delete("Comment", where: "id = ?", whereArgs: [id]);
+  }
+
+  // delete all comments inside a note
   Future<void> deleteComments(int noteId) async{
     final Database db = await initializeDb();
     await db.delete("Comment", where: "noteId = ?", whereArgs: [noteId]);
